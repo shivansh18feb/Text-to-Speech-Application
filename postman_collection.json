@@ -1,0 +1,493 @@
+{
+  "info": {
+    "_postman_id": "8f3b2c1a-7e4d-4958-8b9a-6a5d4e3f2c1b",
+    "name": "Text-to-Speech Full-Stack API Collection",
+    "description": "Comprehensive Postman collection for the Text-to-Speech Application covering Health, Catalog, Auth, TTS, History, Favorites, Document Extraction, AI Text Enhancement, and Admin Analytics.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health & Catalog",
+      "item": [
+        {
+          "name": "GET Health Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        },
+        {
+          "name": "GET Supported Languages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/languages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "languages"]
+            }
+          }
+        },
+        {
+          "name": "GET All Voices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/voices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "voices"]
+            }
+          }
+        },
+        {
+          "name": "GET Voices for Language (en-US)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/voices?language=en-US",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "voices"],
+              "query": [
+                {
+                  "key": "language",
+                  "value": "en-US"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "POST Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Developer\",\n  \"email\": \"alice@tts.com\",\n  \"password\": \"Alice@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "POST Login Demo User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@tts.com\",\n  \"password\": \"Demo@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "POST Login Admin User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@tts.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "GET Current User Profile (/me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Speech Synthesis (TTS)",
+      "item": [
+        {
+          "name": "POST Generate Speech (English)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hello, welcome to our Text to Speech application. Enjoy natural audio generation!\",\n  \"language\": \"en-US\",\n  \"voice\": \"en-US-Standard\",\n  \"speed\": 1.0,\n  \"pitch\": 1.0,\n  \"voiceStyle\": \"Standard\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tts"]
+            }
+          }
+        },
+        {
+          "name": "POST Generate Speech (Hindi)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"नमस्ते! टेक्स्ट-टू-स्पीच एप्लिकेशन में आपका स्वागत है।\",\n  \"language\": \"hi-IN\",\n  \"voice\": \"hi-IN-Standard\",\n  \"speed\": 1.0,\n  \"pitch\": 1.0,\n  \"voiceStyle\": \"Standard\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tts"]
+            }
+          }
+        },
+        {
+          "name": "GET Stream Audio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tts/audio/speech_sample.mp3",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tts", "audio", "speech_sample.mp3"]
+            }
+          }
+        },
+        {
+          "name": "GET Download Audio (attachment)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tts/audio/speech_sample.mp3?download=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tts", "audio", "speech_sample.mp3"],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. History & Favorites",
+      "item": [
+        {
+          "name": "GET Speech History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history"]
+            }
+          }
+        },
+        {
+          "name": "DELETE History Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET Favorites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/favorites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "favorites"]
+            }
+          }
+        },
+        {
+          "name": "POST Add Favorite Voice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"VOICE\",\n  \"referenceId\": \"en-US-Female\",\n  \"title\": \"English US Female Voice\",\n  \"metadataJson\": \"{\\\"language\\\":\\\"en-US\\\"}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/favorites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "favorites"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Document Extraction & AI",
+      "item": [
+        {
+          "name": "POST Extract Document Text",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/files/extract",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "files", "extract"]
+            }
+          }
+        },
+        {
+          "name": "POST AI Enhance Text (Conversational)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"i cannot come to the conference because it is very difficult for me to travel right now\",\n  \"action\": \"conversational\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/enhance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ai", "enhance"]
+            }
+          }
+        },
+        {
+          "name": "POST AI Summarize Text",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Artificial intelligence is transforming text to speech applications. Natural synthesis enables rich learning. In conclusion audio makes documents accessible to all.\",\n  \"action\": \"summarize\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ai/enhance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ai", "enhance"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Admin & Analytics",
+      "item": [
+        {
+          "name": "GET Public Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics"]
+            }
+          }
+        },
+        {
+          "name": "GET Admin Stats (Requires Admin Role)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "stats"]
+            }
+          }
+        },
+        {
+          "name": "GET Admin Users List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "GET Admin System Limits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/limits",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "limits"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
