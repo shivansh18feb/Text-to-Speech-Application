@@ -1,6 +1,6 @@
 import { getAuthToken, clearAuthSession } from './api';
 
-const GRAPHQL_URL = '/graphql';
+const GRAPHQL_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/graphql`;
 
 /**
  * Native Fetch GraphQL Client
