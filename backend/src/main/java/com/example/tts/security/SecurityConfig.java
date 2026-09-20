@@ -51,15 +51,24 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
+    @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins:*}")
+    private String allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:3000"
-        ));
+        
+        java.util.List<String> origins = java.util.Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(java.util.stream.Collectors.toList());
+
+        if (origins.contains("*") || origins.isEmpty()) {
+            configuration.setAllowedOriginPatterns(List.of("*"));
+        } else {
+            configuration.setAllowedOriginPatterns(origins);
+        }
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
