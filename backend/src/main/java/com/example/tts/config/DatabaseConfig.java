@@ -34,7 +34,7 @@ public class DatabaseConfig {
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
 
-        String finalUrl = dbUrl;
+        String finalUrl = dbUrl != null ? dbUrl.trim() : "";
         String username = dbUsername;
         String password = dbPassword;
 
@@ -43,8 +43,13 @@ public class DatabaseConfig {
             finalUrl = finalUrl.replace(";AUTO_SERVER=TRUE", "").replace("AUTO_SERVER=TRUE;", "");
         }
 
-        // Automatically convert Render/Heroku/Supabase postgres:// or postgresql:// URLs to valid JDBC format
-        if (finalUrl.startsWith("postgres://") || finalUrl.startsWith("postgresql://")) {
+        // Validate URL format - if literal variable name or invalid string was passed in Render, fallback safely to H2
+        if (finalUrl.isBlank() || (!finalUrl.startsWith("jdbc:") && !finalUrl.startsWith("postgres://") && !finalUrl.startsWith("postgresql://"))) {
+            log.warn("Invalid JDBC URL '{}' provided in environment. Falling back to in-memory H2 database.", finalUrl);
+            finalUrl = "jdbc:h2:mem:ttsdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE";
+            config.setDriverClassName("org.h2.Driver");
+        } else if (finalUrl.startsWith("postgres://") || finalUrl.startsWith("postgresql://")) {
+            // Automatically convert Render/Heroku/Supabase postgres:// or postgresql:// URLs to valid JDBC format
             try {
                 URI uri = new URI(finalUrl);
                 String host = uri.getHost();
@@ -75,8 +80,8 @@ public class DatabaseConfig {
             }
         } else if (finalUrl.startsWith("jdbc:postgresql:")) {
             config.setDriverClassName("org.postgresql.Driver");
-            // Automatically append sslmode=require for Render external postgres if missing
-            if (!finalUrl.contains("sslmode=") && (finalUrl.contains("render.com") || finalUrl.contains("supabase") || finalUrl.contains("neon"))) {
+            // Automatically append sslmode=require for Render external postgres or Supabase if missing
+            if (!finalUrl.contains("sslmode=") && (finalUrl.contains("render.com") || finalUrl.contains("supabase") || finalUrl.contains("neon") || finalUrl.contains("pooler"))) {
                 finalUrl += (finalUrl.contains("?") ? "&" : "?") + "sslmode=require";
             }
         } else if (finalUrl.startsWith("jdbc:h2:")) {
