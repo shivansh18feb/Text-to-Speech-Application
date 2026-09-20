@@ -22,6 +22,13 @@ public class FavoriteService {
         return favoriteRepository.findByUserOrderByCreatedAtDesc(user);
     }
 
+    public boolean isFavorite(User user, String targetType, String referenceId) {
+        if (user == null) {
+            return false;
+        }
+        return favoriteRepository.existsByUserAndTargetTypeAndReferenceId(user, targetType, referenceId);
+    }
+
     @Transactional
     public Favorite addFavorite(User user, String targetType, String referenceId, String title, String metadataJson) {
         Optional<Favorite> existing = favoriteRepository.findByUserAndTargetTypeAndReferenceId(user, targetType, referenceId);

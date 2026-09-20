@@ -40,4 +40,9 @@ public class AuthController {
         UserDto user = authService.getCurrentUser(authentication.getName());
         return ResponseEntity.ok(user);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<java.util.Map<String, Object>> logout() {
+        return ResponseEntity.ok(java.util.Map.of("success", true, "message", "Successfully logged out."));
+    }
 }

@@ -24,13 +24,31 @@ public class SpeechHistoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SpeechHistory>> getHistory(Authentication authentication) {
+    public ResponseEntity<List<SpeechHistory>> getHistory(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            Authentication authentication) {
         User user = null;
         if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName())) {
             user = authService.getAuthenticatedUserEntity(authentication.getName());
         }
+        if (page != null && size != null && size > 0) {
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(Math.max(0, page), size);
+            return ResponseEntity.ok(historyService.getUserHistory(user, pageable));
+        }
         List<SpeechHistory> history = historyService.getUserHistory(user);
         return ResponseEntity.ok(history);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SpeechHistory> getHistoryById(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(401).build();
+        }
+        User user = authService.getAuthenticatedUserEntity(authentication.getName());
+        return historyService.getHistoryItemById(id, user)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

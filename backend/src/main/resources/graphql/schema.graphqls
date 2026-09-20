@@ -1,0 +1,124 @@
+# GraphQL Schema for Text-to-Speech Application
+# Supports current user, voice/language catalog, user history, favorites, analytics, and mutations alongside existing REST APIs.
+
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    role: String!
+    createdAt: String!
+}
+
+type Voice {
+    id: ID!
+    name: String!
+    gender: String!
+    languageCode: String!
+}
+
+type Language {
+    code: String!
+    name: String!
+    nativeName: String!
+    voices: [Voice!]!
+}
+
+type SpeechHistory {
+    id: ID!
+    text: String!
+    language: String!
+    voice: String!
+    speed: Float!
+    pitch: Float!
+    voiceStyle: String!
+    audioUrl: String!
+    audioSizeBytes: Float
+    characterCount: Int
+    wordCount: Int
+    createdAt: String!
+}
+
+type SpeechHistoryPage {
+    content: [SpeechHistory!]!
+    totalElements: Int!
+    totalPages: Int!
+    page: Int!
+    size: Int!
+}
+
+type Favorite {
+    id: ID!
+    targetType: String!
+    referenceId: String!
+    title: String!
+    metadataJson: String
+    createdAt: String!
+}
+
+type UserAnalytics {
+    totalGenerations: Int!
+    totalCharacters: Int!
+    totalWords: Int!
+    totalFavorites: Int!
+    topLanguage: String
+    topVoice: String
+}
+
+type SystemAnalytics {
+    totalUsers: Int!
+    totalGenerations: Int!
+    totalCharactersConverted: Int!
+    activeProviders: Int!
+    systemStatus: String!
+}
+
+input FavoriteInput {
+    targetType: String!
+    referenceId: String!
+    title: String!
+    metadataJson: String
+}
+
+type Query {
+    "Returns the authenticated user profile."
+    me: User
+
+    "Returns the supported international languages and their voice sets."
+    languages: [Language!]!
+
+    "Returns supported voices, optionally filtered by language tag."
+    voices(language: String): [Voice!]!
+
+    "Returns speech generation history for the authenticated user with pagination."
+    mySpeechHistory(page: Int = 0, size: Int = 20): SpeechHistoryPage!
+
+    "Returns a single speech history item by ID with ownership verification."
+    speechHistoryItem(id: ID!): SpeechHistory
+
+    "Returns all favorites bookmarked by the authenticated user."
+    myFavorites: [Favorite!]!
+
+    "Checks if a target voice or snippet is favorited by the authenticated user."
+    isFavorite(targetType: String!, referenceId: String!): Boolean!
+
+    "Returns aggregated personal usage analytics for the authenticated user."
+    myAnalytics: UserAnalytics!
+
+    "Returns platform-wide system metrics. Requires ROLE_ADMIN."
+    systemAnalytics: SystemAnalytics!
+}
+
+type Mutation {
+    "Deletes a single speech history item by ID."
+    deleteSpeechHistory(id: ID!): Boolean!
+
+    "Clears all speech history for the authenticated user."
+    clearSpeechHistory: Boolean!
+
+    "Adds a voice or snippet to the authenticated user's favorites."
+    addFavorite(input: FavoriteInput!): Favorite!
+
+    "Removes a favorite item by ID."
+    removeFavorite(id: ID!): Boolean!
+}

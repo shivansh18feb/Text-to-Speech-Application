@@ -43,3 +43,11 @@ pnpm-debug.log*
 backend/generated-audio/
 *.mp3
 *.wav
+
+# Database Data Files & Locks
+backend/data/
+data/
+*.mv.db
+*.lock.db
+*.trace.db
+

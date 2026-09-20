@@ -187,6 +187,23 @@
               "path": ["api", "auth", "me"]
             }
           }
+        },
+        {
+          "name": "POST Logout User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          }
         }
       ]
     },
@@ -292,6 +309,23 @@
           }
         },
         {
+          "name": "GET History Entry By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/history/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "history", "1"]
+            }
+          }
+        },
+        {
           "name": "DELETE History Item",
           "request": {
             "method": "DELETE",
@@ -322,6 +356,33 @@
               "raw": "{{baseUrl}}/api/favorites",
               "host": ["{{baseUrl}}"],
               "path": ["api", "favorites"]
+            }
+          }
+        },
+        {
+          "name": "GET Check Favorite Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/favorites/check?targetType=VOICE&referenceId=en-US-Female",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "favorites", "check"],
+              "query": [
+                {
+                  "key": "targetType",
+                  "value": "VOICE"
+                },
+                {
+                  "key": "referenceId",
+                  "value": "en-US-Female"
+                }
+              ]
             }
           }
         },

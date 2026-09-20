@@ -38,6 +38,19 @@ public class FavoriteController {
         return ResponseEntity.ok(favoriteService.getUserFavorites(user));
     }
 
+    @GetMapping("/check")
+    public ResponseEntity<Map<String, Object>> checkFavorite(
+            @RequestParam String targetType,
+            @RequestParam String referenceId,
+            Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.ok(Map.of("isFavorite", false));
+        }
+        User user = authService.getAuthenticatedUserEntity(authentication.getName());
+        boolean isFav = favoriteService.isFavorite(user, targetType, referenceId);
+        return ResponseEntity.ok(Map.of("isFavorite", isFav));
+    }
+
     @PostMapping
     public ResponseEntity<Favorite> addFavorite(@Valid @RequestBody FavoriteRequest request, Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {

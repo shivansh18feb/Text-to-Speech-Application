@@ -77,15 +77,28 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)) // for H2 console
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Full authentication is required to access this resource.\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("{\"status\":403,\"error\":\"Forbidden\",\"message\":\"You do not have permission to access this resource.\"}");
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/health/**").permitAll()
                         .requestMatchers("/api/languages/**").permitAll()
                         .requestMatchers("/api/voices/**").permitAll()
                         .requestMatchers("/api/tts/**").permitAll()
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/logout").permitAll()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/ai/**").permitAll()
+                        .requestMatchers("/graphql/**", "/graphiql/**").permitAll()
                         .requestMatchers("/api/analytics/system").hasRole("ADMIN")
                         .requestMatchers("/api/analytics/me", "/api/analytics/user").authenticated()
                         .requestMatchers("/api/analytics").permitAll()
@@ -95,6 +108,7 @@ public class SecurityConfig {
                         // Protected user endpoints
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/history/**").permitAll() // allows anonymous history fetching or authenticated
+                        .requestMatchers("/api/favorites/check").permitAll()
                         .requestMatchers("/api/favorites/**").authenticated()
                         // All other API requests
                         .anyRequest().permitAll()

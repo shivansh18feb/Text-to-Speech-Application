@@ -3,9 +3,11 @@ package com.example.tts.service;
 import com.example.tts.entity.SpeechHistory;
 import com.example.tts.entity.User;
 import com.example.tts.repository.SpeechHistoryRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,7 +45,21 @@ public class SpeechHistoryService {
         if (user != null) {
             return historyRepository.findByUserOrderByCreatedAtDesc(user);
         }
-        return historyRepository.findAllByOrderByCreatedAtDesc();
+        return Collections.emptyList();
+    }
+
+    public List<SpeechHistory> getUserHistory(User user, Pageable pageable) {
+        if (user != null) {
+            return historyRepository.findByUserOrderByCreatedAtDesc(user, pageable).getContent();
+        }
+        return Collections.emptyList();
+    }
+
+    public org.springframework.data.domain.Page<SpeechHistory> getUserHistoryPage(User user, Pageable pageable) {
+        if (user != null) {
+            return historyRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+        }
+        return org.springframework.data.domain.Page.empty();
     }
 
     public List<SpeechHistory> getAllHistory() {
@@ -52,6 +68,18 @@ public class SpeechHistoryService {
 
     public Optional<SpeechHistory> getHistoryById(Long id) {
         return historyRepository.findById(id);
+    }
+
+    public Optional<SpeechHistory> getHistoryItemById(Long id, User user) {
+        Optional<SpeechHistory> itemOpt = historyRepository.findById(id);
+        if (itemOpt.isPresent()) {
+            SpeechHistory item = itemOpt.get();
+            if (user != null && (user.getRole().equals("ROLE_ADMIN")
+                    || (item.getUser() != null && item.getUser().getId().equals(user.getId())))) {
+                return itemOpt;
+            }
+        }
+        return Optional.empty();
     }
 
     @Transactional

@@ -24,6 +24,7 @@ import {
   getStoredUser,
   setAuthToken,
   setStoredUser,
+  logoutUser,
   addFavorite,
 } from './services/api';
 import { Star } from 'lucide-react';
@@ -168,9 +169,8 @@ export default function App() {
     setActiveTab('synth');
   };
 
-  const handleLogout = () => {
-    setAuthToken(null);
-    setStoredUser(null);
+  const handleLogout = async () => {
+    await logoutUser();
     setUser(null);
     setActiveTab('auth');
     setAudioResult(null);

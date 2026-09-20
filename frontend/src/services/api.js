@@ -121,6 +121,19 @@ export async function loginUser({ email, password }) {
   return handleApiResponse(res, 'Invalid email or password');
 }
 
+export async function logoutUser() {
+  try {
+    await fetch(`${BASE_URL}/api/auth/logout`, {
+      method: 'POST',
+      headers: getHeaders(true),
+    });
+  } catch (e) {
+    // Session cleanup proceeds regardless
+  } finally {
+    clearAuthSession();
+  }
+}
+
 export async function getMe() {
   const res = await fetch(`${BASE_URL}/api/auth/me`, { headers: getHeaders() });
   return handleApiResponse(res, 'Failed to retrieve profile');
@@ -173,6 +186,18 @@ export async function removeFavorite(id) {
     headers: getHeaders(),
   });
   return handleApiResponse(res, 'Failed to remove favorite');
+}
+
+export async function checkFavoriteStatus(targetType, referenceId) {
+  try {
+    const res = await fetch(
+      `${BASE_URL}/api/favorites/check?targetType=${encodeURIComponent(targetType)}&referenceId=${encodeURIComponent(referenceId)}`,
+      { headers: getHeaders() }
+    );
+    return await handleApiResponse(res, 'Failed to check favorite status');
+  } catch (e) {
+    return { isFavorite: false };
+  }
 }
 
 /**
