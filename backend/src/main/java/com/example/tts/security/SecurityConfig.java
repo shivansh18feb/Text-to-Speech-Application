@@ -21,8 +21,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -57,20 +59,25 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        java.util.List<String> origins = java.util.Arrays.stream(allowedOrigins.split(","))
+
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
         if (origins.contains("*") || origins.isEmpty()) {
             configuration.setAllowedOriginPatterns(List.of("*"));
         } else {
-            configuration.setAllowedOriginPatterns(origins);
+            List<String> patterns = new ArrayList<>(origins);
+            patterns.add("https://*.vercel.app");
+            patterns.add("http://localhost:*");
+            patterns.add("http://127.0.0.1:*");
+            configuration.setAllowedOriginPatterns(patterns);
         }
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type", "X-Total-Count"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -99,6 +106,8 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // Explicitly permit all OPTIONS preflight requests for CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Public endpoints
                         .requestMatchers("/api/health/**").permitAll()
                         .requestMatchers("/api/languages/**").permitAll()
@@ -116,7 +125,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Protected user endpoints
                         .requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers("/api/history/**").permitAll() // allows anonymous history fetching or authenticated
+                        .requestMatchers("/api/history/**").permitAll()
                         .requestMatchers("/api/favorites/check").permitAll()
                         .requestMatchers("/api/favorites/**").authenticated()
                         // All other API requests
